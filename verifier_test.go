@@ -58,3 +58,65 @@ func TestCheckHtmlMetaTag(t *testing.T) {
 		})
 	}
 }
+
+type ownershipVerification struct {
+	Code string `xml:"code" json:"myapp_site_verification"`
+}
+
+func TestCheckJsonFile(t *testing.T) {
+	type args struct {
+		domain        string
+		fileName      string
+		expectedValue interface{}
+	}
+
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name: "Successful json verification",
+			args: args{
+				domain:        "domainverify.lioncoding.workers.dev",
+				fileName:      "myapp-site-verification.json",
+				expectedValue: ownershipVerification{Code: "dcf56hgvghy674fc"},
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "Failed json verification",
+			args: args{
+				domain:        "domainverify.lioncoding.workers.dev",
+				fileName:      "myapp-site-verification.json",
+				expectedValue: ownershipVerification{Code: "1234567891"},
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "Invalid domain",
+			args: args{
+				domain:        "invalid domain",
+				fileName:      "myapp-site-verification.json",
+				expectedValue: ownershipVerification{Code: "1234567891"},
+			},
+			want:    false,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CheckJsonFile(tt.args.domain, tt.args.fileName, tt.args.expectedValue)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CheckJsonFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("CheckJsonFile() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
