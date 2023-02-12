@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 const rootDomain = "@"
@@ -182,6 +183,52 @@ func CheckTxtRecord(domain, hostName, recordContent string) (bool, error) {
 	// Check if the TXT record exists
 	for _, record := range records {
 		if record == recordContent {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+// CheckCnameRecord checks if the domain has a DNS CNAME record
+// with the specified value to verify ownership of the domain
+//
+// Parameters:
+//   - domain: the domain name to check
+//   - recordName: the name of the DNS CNAME record to check
+//   - targetValue: the value of recordName
+//
+// Returns:
+//   - true if the ownership of the domain is verified
+//   - error if any
+//
+// Example:
+//
+//	domain := "website.com"
+//	recordName := "1234567890"
+//	targetValue := "verify.myapp.com"
+//	verified, err := domainverify.CheckDnsCnameRecord(domain, recordName, targetValue)
+func CheckCnameRecord(domain, recordName, targetValue string) (bool, error) {
+	if !IsValidDomainName(domain) {
+		return false, InvalidDomainError
+	}
+
+	host := fmt.Sprintf("%s.%s", recordName, domain)
+	// Get the DNS records for the domain
+	cname, err := net.LookupCNAME(host)
+	if err != nil {
+		return false, err
+	}
+
+	// Check if the CNAME record exists
+	if cname == targetValue {
+		return true, nil
+	}
+
+	// Verify if targetValue has a trailing dot at the end, if not, add it
+	if !strings.HasSuffix(targetValue, ".") {
+		targetValue = fmt.Sprintf("%s.", targetValue)
+		if cname == targetValue {
 			return true, nil
 		}
 	}
