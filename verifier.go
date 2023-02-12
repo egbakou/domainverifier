@@ -6,7 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"net"
+	"github.com/egbakou/domainverifier/dnsresolver"
+	"github.com/miekg/dns"
 	"net/http"
 	"reflect"
 	"strings"
@@ -158,7 +159,9 @@ func checkXmlOrJsonFile(useXmlMethod bool, domain, fileName string, expectedValu
 // with the specified value to verify ownership of the domain
 //
 // Parameters:
+//   - dnsResolver: the DNS server to use
 //   - domain: the domain name to check
+//   - hostName: the TXT record name
 //   - recordContent: the name of the DNS TXT record to check
 //
 // Returns:
@@ -167,37 +170,20 @@ func checkXmlOrJsonFile(useXmlMethod bool, domain, fileName string, expectedValu
 //
 // Example:
 //
+//	dnsResolver = dnsresolver.CloudflareDNS
 //	domain := "website.com"
+//	hostName := "@"
 //	recordName := "myapp-site-verification=1234567890"
-//	verified, err := domainverify.CheckDnsTxtRecord(domain, recordName)
-func CheckTxtRecord(domain, hostName, recordContent string) (bool, error) {
-	if !IsValidDomainName(domain) {
-		return false, InvalidDomainError
-	}
-
-	if hostName != rootDomain && hostName != domain {
-		domain = fmt.Sprintf("%s.%s", hostName, domain)
-	}
-
-	records, err := net.LookupTXT(domain)
-	if err != nil {
-		return false, err
-	}
-
-	// Check if the TXT record exists
-	for _, record := range records {
-		if record == recordContent {
-			return true, nil
-		}
-	}
-
-	return false, nil
+//	verified, err := domainverify.CheckDnsTxtRecord(dnsServer, domain, hostName, recordName)
+func CheckTxtRecord(dnsResolver, domain, hostName, recordContent string) (bool, error) {
+	return checkDNSRecord(dnsResolver, domain, hostName, recordContent, dns.TypeTXT)
 }
 
 // CheckCnameRecord checks if the domain has a DNS CNAME record
 // with the specified value to verify ownership of the domain
 //
 // Parameters:
+//   - dnsResolver: the DNS server to use
 //   - domain: the domain name to check
 //   - recordName: the name of the DNS CNAME record to check
 //   - targetValue: the value of recordName
@@ -208,32 +194,55 @@ func CheckTxtRecord(domain, hostName, recordContent string) (bool, error) {
 //
 // Example:
 //
+//	dnsResolver = dnsresolver.CloudflareDNS
 //	domain := "website.com"
 //	recordName := "1234567890"
 //	targetValue := "verify.myapp.com"
-//	verified, err := domainverify.CheckDnsCnameRecord(domain, recordName, targetValue)
-func CheckCnameRecord(domain, recordName, targetValue string) (bool, error) {
+//	verified, err := domainverify.CheckDnsCnameRecord(dnsResolver, domain, recordName, targetValue)
+func CheckCnameRecord(dnsResolver, domain, recordName, targetValue string) (bool, error) {
+	return checkDNSRecord(dnsResolver, domain, recordName, targetValue, dns.TypeCNAME)
+}
+
+func checkDNSRecord(dnsResolver, domain, recordName, recordContent string, recordType uint16) (bool, error) {
+	if strings.TrimSpace(dnsResolver) == "" {
+		dnsResolver = dnsresolver.CloudflareDNS
+	}
+
 	if !IsValidDomainName(domain) {
 		return false, InvalidDomainError
 	}
 
-	host := fmt.Sprintf("%s.%s", recordName, domain)
-	// Get the DNS records for the domain
-	cname, err := net.LookupCNAME(host)
+	if recordName != rootDomain && recordName != domain {
+		domain = fmt.Sprintf("%s.%s", recordName, domain)
+	}
+
+	c := dns.Client{}
+	m := dns.Msg{}
+	m.SetQuestion(dns.Fqdn(domain), recordType)
+	r, _, err := c.Exchange(&m, dnsResolver)
 	if err != nil {
 		return false, err
 	}
 
-	// Check if the CNAME record exists
-	if cname == targetValue {
-		return true, nil
+	if r.Rcode != dns.RcodeSuccess {
+		return false, nil
 	}
 
-	// Verify if targetValue has a trailing dot at the end, if not, add it
-	if !strings.HasSuffix(targetValue, ".") {
-		targetValue = fmt.Sprintf("%s.", targetValue)
-		if cname == targetValue {
-			return true, nil
+	for _, a := range r.Answer {
+		switch t := a.(type) {
+		case *dns.TXT:
+			for _, txt := range t.Txt {
+				if txt == recordContent {
+					return true, nil
+				}
+			}
+		case *dns.CNAME:
+			if !strings.HasSuffix(recordContent, ".") {
+				recordContent = fmt.Sprintf("%s.", recordContent)
+			}
+			if t.Target == recordContent {
+				return true, nil
+			}
 		}
 	}
 
