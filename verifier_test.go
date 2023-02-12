@@ -244,3 +244,70 @@ func TestCheckTxtRecord(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckCnameRecord(t *testing.T) {
+	type args struct {
+		domain      string
+		recordName  string
+		targetValue string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name: "Successful cname verification",
+			args: args{
+				domain:      "lioncoding.com",
+				recordName:  "random000454",
+				targetValue: "ownership-demo-app.com",
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "Failed cname verification",
+			args: args{
+				domain:      "lioncoding.com",
+				recordName:  "random000454",
+				targetValue: "1234567891",
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "Invalid record name",
+			args: args{
+				domain:      "lioncoding.com",
+				recordName:  "unknown",
+				targetValue: "1234567891",
+			},
+			want:    false,
+			wantErr: true,
+		},
+		{
+			name: "Invalid domain",
+			args: args{
+				domain:      "invalid domain",
+				recordName:  "unknown",
+				targetValue: "1234567891",
+			},
+			want:    false,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CheckCnameRecord(tt.args.domain, tt.args.recordName, tt.args.targetValue)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CheckCnameRecord() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("CheckCnameRecord() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
