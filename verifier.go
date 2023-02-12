@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"net"
 	"net/http"
 	"reflect"
 )
@@ -146,4 +147,44 @@ func checkXmlOrJsonFile(useXmlMethod bool, domain, fileName string, expectedValu
 	mustMatchValue := reflect.ValueOf(expectedValue)
 
 	return actualValue.Interface() == mustMatchValue.Interface(), nil
+}
+
+// CheckTxtRecord checks if the domain has a DNS TXT record
+// with the specified value to verify ownership of the domain
+//
+// Parameters:
+//   - domain: the domain name to check
+//   - recordContent: the name of the DNS TXT record to check
+//
+// Returns:
+//   - true if the ownership of the domain is verified
+//   - error if any
+//
+// Example:
+//
+//	domain := "website.com"
+//	recordName := "myapp-site-verification=1234567890"
+//	verified, err := domainverify.CheckDnsTxtRecord(domain, recordName)
+func CheckTxtRecord(domain, hostName, recordContent string) (bool, error) {
+	if !IsValidDomainName(domain) {
+		return false, InvalidDomainError
+	}
+
+	if hostName != rootDomain && hostName != domain {
+		domain = fmt.Sprintf("%s.%s", hostName, domain)
+	}
+
+	records, err := net.LookupTXT(domain)
+	if err != nil {
+		return false, err
+	}
+
+	// Check if the TXT record exists
+	for _, record := range records {
+		if record == recordContent {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
