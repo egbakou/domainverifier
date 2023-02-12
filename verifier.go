@@ -1,10 +1,13 @@
 package domainverifier
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
+	"reflect"
 )
 
 const rootDomain = "@"
@@ -57,4 +60,90 @@ func CheckHtmlMetaTag(domain, metaTagName, metaTagContent string) (bool, error) 
 	}
 
 	return content == metaTagContent, nil
+}
+
+// CheckJsonFile checks if the json file exists and has
+// the expected content to verify ownership of the domain
+//
+// Parameters:
+//   - domain: the domain name to check
+//   - fileName: the name of the json file to check
+//   - expectedValue: the expected content
+//
+// Returns:
+//   - true if the ownership of the domain is verified
+//   - error if any
+//
+// Example:
+//
+//	type OwnershipVerification struct {
+//		Code string `json:"myapp_site_verification"`
+//	}
+//	data := OwnershipVerification{Code: "1234567890"}
+//	domain := "website.com"
+//	fileName := "myapp-site-verification.json" // excepted file content: {"myapp_site_verification": "1234567890"}
+//	verified, err := domainverify.CheckJsonFile(domain, fileName, data)
+func CheckJsonFile(domain, fileName string, expectedValue interface{}) (bool, error) {
+	return checkXmlOrJsonFile(false, domain, fileName, expectedValue)
+}
+
+// CheckXmlFile checks if the xml file exists and has
+// the expected content to verify ownership of the domain
+//
+// Parameters:
+//   - domain: the domain name to check
+//   - fileName: the name of the xml file to check
+//   - expectedValue: the expected content
+//
+// Returns:
+//   - true if the ownership of the domain is verified
+//   - error if any
+//
+// Example:
+//
+//	type OwnershipVerification struct {
+//	    XMLName struct{} `xml:"verification"`
+//		Code string `xml:"code" json:"myapp_site_verification"`
+//	}
+//	data := OwnershipVerification{Code: "1234567890"}
+//	domain := "website.com"
+//	fileName := "myappSiteAuth.xml" // excepted file content: <verification><code>1234567890</code></verification>
+//	verified, err := domainverify.CheckXmlFile(domain, fileName, data)
+func CheckXmlFile(domain, fileName string, expectedValue interface{}) (bool, error) {
+	return checkXmlOrJsonFile(true, domain, fileName, expectedValue)
+}
+
+// checkXmlOrJsonFile checks domain name ownership using Xml or Json method
+func checkXmlOrJsonFile(useXmlMethod bool, domain, fileName string, expectedValue interface{}) (bool, error) {
+	if !IsValidDomainName(domain) {
+		return false, InvalidDomainError
+	}
+
+	// Only struct type is supported
+	if reflect.TypeOf(expectedValue).Kind() != reflect.Struct {
+		return false, errors.New("expectedValue must be a struct")
+	}
+
+	resp, err := makeHttpCall(fmt.Sprintf("%s/%s", domain, fileName))
+	if err != nil {
+		return false, err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return false, InvalidResponseError
+	}
+
+	// Decode the XML response from the URL
+	decodedValue := reflect.New(reflect.TypeOf(expectedValue)).Interface()
+	if useXmlMethod {
+		err = xml.NewDecoder(resp.Body).Decode(decodedValue)
+	} else {
+		err = json.NewDecoder(resp.Body).Decode(decodedValue)
+	}
+
+	actualValue := reflect.ValueOf(decodedValue).Elem()
+	mustMatchValue := reflect.ValueOf(expectedValue)
+
+	return actualValue.Interface() == mustMatchValue.Interface(), nil
 }
