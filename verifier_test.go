@@ -177,3 +177,70 @@ func TestCheckXmlFile(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckTxtRecord(t *testing.T) {
+	type args struct {
+		domain        string
+		hostName      string
+		recordContent string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name: "Successful txt verification",
+			args: args{
+				domain:        "lioncoding.com",
+				hostName:      "@",
+				recordContent: "ownership-demo-app=random000454",
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "Failed txt verification",
+			args: args{
+				domain:        "lioncoding.com",
+				hostName:      "@",
+				recordContent: "ownership-demo-app=1234567891",
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "Invalid host name",
+			args: args{
+				domain:        "lioncoding.com",
+				hostName:      "unknown",
+				recordContent: "ownership-demo-app=1234567891",
+			},
+			want:    false,
+			wantErr: true,
+		},
+		{
+			name: "Invalid domain",
+			args: args{
+				domain:        "invalid domain",
+				hostName:      "unknown",
+				recordContent: "ownership-demo-app=1234567891",
+			},
+			want:    false,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CheckTxtRecord(tt.args.domain, tt.args.hostName, tt.args.recordContent)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CheckTxtRecord() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("CheckTxtRecord() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
