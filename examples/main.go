@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"github.com/egbakou/domainverifier"
+	"github.com/egbakou/domainverifier/dnsresolver"
 )
 
 type OwnershipVerification struct {
@@ -41,7 +42,8 @@ func main() {
 	}
 	fmt.Println("Xml File is verified:", isVerified)
 
-	isVerified, err = domainverifier.CheckTxtRecord("lioncoding.com",
+	isVerified, err = domainverifier.CheckTxtRecord(dnsresolver.GooglePublicDNS,
+		"lioncoding.com",
 		"@",
 		"ownership-demo-app=random000454")
 	if err != nil {
@@ -49,7 +51,8 @@ func main() {
 	}
 	fmt.Println("Dns Txt Record is verified:", isVerified)
 
-	isVerified, err = domainverifier.CheckCnameRecord("lioncoding.com",
+	isVerified, err = domainverifier.CheckCnameRecord(dnsresolver.CloudflareDNS,
+		"lioncoding.com",
 		"random000454",
 		"ownership-demo-app.com")
 	if err != nil {
