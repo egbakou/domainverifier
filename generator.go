@@ -195,3 +195,18 @@ func GenerateTxtRecord(appName string) (*DnsRecordInstruction, error) {
 	}
 	return GenerateTxtRecordFromConfig(txtConfig, false)
 }
+
+// GenerateCnameRecordFromConfig generates the CNAME verification method instructions.
+// It uses the provided config.CnameGenerator to generate the instructions.
+func GenerateCnameRecordFromConfig(config *config.CnameRecordGenerator) (*DnsRecordInstruction, error) {
+	if err := config.Validate(); err != nil {
+		return nil, err
+	}
+
+	return &DnsRecordInstruction{
+		HostName: config.RecordName,
+		Record:   config.RecordTarget,
+		Action: fmt.Sprintf(`Add CNAME (alias) record with name %s and value %s.`,
+			config.RecordName, config.RecordTarget),
+	}, nil
+}
