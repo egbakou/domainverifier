@@ -2,6 +2,7 @@ package domainverifier
 
 import (
 	"errors"
+	"fmt"
 	"github.com/egbakou/domainverifier/config"
 	"github.com/segmentio/ksuid"
 	"strings"
@@ -73,4 +74,44 @@ func GenerateHtmlMeta(appName string, sanitizeAppName bool) (*HtmlMetaInstructio
 		Code:    ksuid.New().String(),
 	}
 	return GenerateHtmlMetaFromConfig(htmTagConfig, false)
+}
+
+// GenerateJsonFromConfig generates the JSON verification method instructions.
+// It uses the provided config.JsonGenerator to generate the instructions.
+// If useInternalCode is true, internal K-Sortable Globally Unique ID will be generated.
+// Otherwise, the code in the config.JsonGenerator will be used.
+func GenerateJsonFromConfig(config *config.JsonGenerator, useInternalCode bool) (*FileInstruction, error) {
+	if config != nil && useInternalCode {
+		config.Code = ksuid.New().String()
+	}
+
+	if err := config.Validate(); err != nil {
+		return nil, err
+	}
+
+	fileName := ensureFileExtension(config.FileName, ".json")
+	return &FileInstruction{
+		FileName:    config.FileName,
+		FileContent: getJsonContent(config.Attribute, config.Code),
+		Action:      getJsonInstruction(fileName, config.Attribute, config.Code),
+	}, nil
+}
+
+// GenerateJson generates the JSON verification method instructions.
+// appName is the name of the app that is requesting the verification (e.g. google, bing, etc.).
+// It will be used as prefix of the file name and the attribute name.
+// Note that the appName will be sanitized to non-alphanumeric characters.
+func GenerateJson(appName string) (*FileInstruction, error) {
+	if strings.TrimSpace(appName) == "" {
+		return nil, InvalidAppNameError
+	}
+
+	appName = sanitizeString(appName)
+
+	jsonConfig := &config.JsonGenerator{
+		FileName:  fmt.Sprintf("%s%s", appName, jsonFileNameSuffix),
+		Attribute: fmt.Sprintf("%s%s", appName, jsonKeySuffix),
+		Code:      ksuid.New().String(),
+	}
+	return GenerateJsonFromConfig(jsonConfig, false)
 }
