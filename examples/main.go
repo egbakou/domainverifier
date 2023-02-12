@@ -3,6 +3,11 @@
 
 package main
 
+import (
+	"fmt"
+	"github.com/egbakou/domainverifier"
+)
+
 type OwnershipVerification struct {
 	XMLName struct{} `xml:"verification"` // fix: https://stackoverflow.com/questions/12398925/go-xml-marshalling-and-the-root-element
 	Code    string   `xml:"code" json:"myapp_site_verification"`
