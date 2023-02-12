@@ -490,3 +490,53 @@ func TestGenerateTxtRecord(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateCnameRecordFromConfig(t *testing.T) {
+	type args struct {
+		config *config.CnameRecordGenerator
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *DnsRecordInstruction
+		wantErr bool
+	}{
+		{
+			name: "Successful generation",
+			args: args{
+				config: &config.CnameRecordGenerator{
+					RecordName:   "random-code",
+					RecordTarget: "verify.myapp.com",
+				},
+			},
+			want: &DnsRecordInstruction{
+				HostName: "random-code",
+				Record:   "verify.myapp.com",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validation error",
+			args: args{
+				config: nil,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GenerateCnameRecordFromConfig(tt.args.config)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GenerateCnameRecordFromConfig() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != nil && got.HostName != tt.want.HostName {
+				t.Errorf("expected: %v, got: %v", tt.want.Record, got.Record)
+			}
+			if got != nil && got.Record != tt.want.Record {
+				t.Errorf("expected: %v, got: %v", tt.want.Record, got.Record)
+			}
+		})
+	}
+}
