@@ -1,6 +1,9 @@
 package domainverifier
 
-import "testing"
+import (
+	"github.com/egbakou/domainverifier/dnsresolver"
+	"testing"
+)
 
 func TestCheckHtmlMetaTag(t *testing.T) {
 	type args struct {
@@ -180,6 +183,7 @@ func TestCheckXmlFile(t *testing.T) {
 
 func TestCheckTxtRecord(t *testing.T) {
 	type args struct {
+		dnsResolver   string
 		domain        string
 		hostName      string
 		recordContent string
@@ -193,6 +197,7 @@ func TestCheckTxtRecord(t *testing.T) {
 		{
 			name: "Successful txt verification",
 			args: args{
+				dnsResolver:   dnsresolver.GooglePublicDNS,
 				domain:        "lioncoding.com",
 				hostName:      "@",
 				recordContent: "ownership-demo-app=random000454",
@@ -203,6 +208,7 @@ func TestCheckTxtRecord(t *testing.T) {
 		{
 			name: "Failed txt verification",
 			args: args{
+				dnsResolver:   dnsresolver.CloudflareDNS,
 				domain:        "lioncoding.com",
 				hostName:      "@",
 				recordContent: "ownership-demo-app=1234567891",
@@ -213,16 +219,18 @@ func TestCheckTxtRecord(t *testing.T) {
 		{
 			name: "Invalid host name",
 			args: args{
+				dnsResolver:   dnsresolver.GooglePublicDNS,
 				domain:        "lioncoding.com",
 				hostName:      "unknown",
 				recordContent: "ownership-demo-app=1234567891",
 			},
 			want:    false,
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "Invalid domain",
 			args: args{
+				dnsResolver:   dnsresolver.GooglePublicDNS,
 				domain:        "invalid domain",
 				hostName:      "unknown",
 				recordContent: "ownership-demo-app=1234567891",
@@ -233,7 +241,7 @@ func TestCheckTxtRecord(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := CheckTxtRecord(tt.args.domain, tt.args.hostName, tt.args.recordContent)
+			got, err := CheckTxtRecord(tt.args.dnsResolver, tt.args.domain, tt.args.hostName, tt.args.recordContent)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CheckTxtRecord() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -247,6 +255,7 @@ func TestCheckTxtRecord(t *testing.T) {
 
 func TestCheckCnameRecord(t *testing.T) {
 	type args struct {
+		dnsResolver string
 		domain      string
 		recordName  string
 		targetValue string
@@ -260,6 +269,7 @@ func TestCheckCnameRecord(t *testing.T) {
 		{
 			name: "Successful cname verification",
 			args: args{
+				dnsResolver: dnsresolver.GooglePublicDNS,
 				domain:      "lioncoding.com",
 				recordName:  "random000454",
 				targetValue: "ownership-demo-app.com",
@@ -270,8 +280,9 @@ func TestCheckCnameRecord(t *testing.T) {
 		{
 			name: "Failed cname verification",
 			args: args{
+				dnsResolver: dnsresolver.CloudflareDNS,
 				domain:      "lioncoding.com",
-				recordName:  "random000454",
+				recordName:  "32bee507513d856e27a09646905db629",
 				targetValue: "1234567891",
 			},
 			want:    false,
@@ -280,12 +291,13 @@ func TestCheckCnameRecord(t *testing.T) {
 		{
 			name: "Invalid record name",
 			args: args{
+				dnsResolver: dnsresolver.GooglePublicDNS,
 				domain:      "lioncoding.com",
 				recordName:  "unknown",
 				targetValue: "1234567891",
 			},
 			want:    false,
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "Invalid domain",
@@ -300,7 +312,7 @@ func TestCheckCnameRecord(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := CheckCnameRecord(tt.args.domain, tt.args.recordName, tt.args.targetValue)
+			got, err := CheckCnameRecord(tt.args.dnsResolver, tt.args.domain, tt.args.recordName, tt.args.targetValue)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CheckCnameRecord() error = %v, wantErr %v", err, tt.wantErr)
 				return
