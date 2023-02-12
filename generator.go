@@ -115,3 +115,46 @@ func GenerateJson(appName string) (*FileInstruction, error) {
 	}
 	return GenerateJsonFromConfig(jsonConfig, false)
 }
+
+// GenerateXmlFromConfig generates the XML verification method instructions.
+// It uses the provided config.XmlGenerator to generate the instructions.
+// If useInternalCode is true, internal K-Sortable Globally Unique ID will be generated.
+// Otherwise, the code in the config.XmlGenerator will be used.
+func GenerateXmlFromConfig(config *config.XmlGenerator, useInternalCode bool) (*FileInstruction, error) {
+	if config != nil && useInternalCode {
+		config.Code = ksuid.New().String()
+	}
+
+	if err := config.Validate(); err != nil {
+		return nil, err
+	}
+
+	fileName := ensureFileExtension(config.FileName, ".xml")
+	return &FileInstruction{
+		FileName:    config.FileName,
+		FileContent: getXmlContent(config.RootName, config.Code),
+		Action:      getXmlInstruction(fileName, config.RootName, config.Code),
+	}, nil
+}
+
+// GenerateXml generates the XML verification method instructions.
+// appName is the name of the app that is requesting the verification (e.g. bing, google, etc.).
+// It will be used as prefix of the file name.
+// Note that the appName will be sanitized to non-alphanumeric characters.
+func GenerateXml(appName string, sanitizeAppName bool) (*FileInstruction, error) {
+	if strings.TrimSpace(appName) == "" {
+		return nil, InvalidAppNameError
+	}
+
+	if sanitizeAppName {
+		appName = sanitizeString(appName)
+		// capitalize the first letter
+		appName = strings.ToUpper(appName[:1]) + appName[1:]
+	}
+	xmlConfig := &config.XmlGenerator{
+		FileName: fmt.Sprintf("%s%s", appName, xmlFileNameSuffix),
+		RootName: xmlRootName,
+		Code:     ksuid.New().String(),
+	}
+	return GenerateXmlFromConfig(xmlConfig, false)
+}
