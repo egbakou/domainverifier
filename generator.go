@@ -158,3 +158,40 @@ func GenerateXml(appName string, sanitizeAppName bool) (*FileInstruction, error)
 	}
 	return GenerateXmlFromConfig(xmlConfig, false)
 }
+
+// GenerateTxtRecordFromConfig generates the TXT verification method instructions.
+// It uses the provided config.TxtGenerator to generate the instructions.
+// If useInternalCode is true, internal K-Sortable Globally Unique ID will be generated for the record attribute value.
+// Otherwise, the RecordAttribute in the config.TxtGenerator will be used.
+func GenerateTxtRecordFromConfig(config *config.TxtRecordGenerator, useInternalCode bool) (*DnsRecordInstruction, error) {
+	if config != nil && useInternalCode {
+		config.RecordAttributeValue = ksuid.New().String()
+	}
+
+	if err := config.Validate(); err != nil {
+		return nil, err
+	}
+
+	return &DnsRecordInstruction{
+		HostName: config.HostName,
+		Record:   fmt.Sprintf("%s=%s", config.RecordAttribute, config.RecordAttributeValue),
+		Action: fmt.Sprintf(`Create a TXT record with the name %s or your domain name and the content %s=%s`,
+			config.HostName, config.RecordAttribute, config.RecordAttributeValue),
+	}, nil
+}
+
+// GenerateTxtRecord generates the TXT verification method instructions.
+// appName is the name of the app that is requesting the verification (e.g. bing, google, etc.).
+// It will be used as prefix of the record attribute.
+func GenerateTxtRecord(appName string) (*DnsRecordInstruction, error) {
+	if strings.TrimSpace(appName) == "" {
+		return nil, InvalidAppNameError
+	}
+
+	txtConfig := &config.TxtRecordGenerator{
+		HostName:             rootDomain,
+		RecordAttribute:      fmt.Sprintf("%s%s", appName, txtRecordAttributeSuffix),
+		RecordAttributeValue: ksuid.New().String(),
+	}
+	return GenerateTxtRecordFromConfig(txtConfig, false)
+}
