@@ -380,3 +380,113 @@ func TestGenerateXml(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateTxtRecordFromConfig(t *testing.T) {
+	type args struct {
+		config          *config.TxtRecordGenerator
+		useInternalCode bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *DnsRecordInstruction
+		wantErr bool
+	}{
+		{
+			name: "Successful generation with external code",
+			args: args{
+				config: &config.TxtRecordGenerator{
+					HostName:             "example.com",
+					RecordAttribute:      "myapp",
+					RecordAttributeValue: "random-code",
+				},
+				useInternalCode: false,
+			},
+			want: &DnsRecordInstruction{
+				HostName: "example.com",
+				Record:   "myapp=random-code",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Successful generation with internal code",
+			args: args{
+				config: &config.TxtRecordGenerator{
+					HostName:        "example.com",
+					RecordAttribute: "myapp",
+				},
+				useInternalCode: true,
+			},
+			want: &DnsRecordInstruction{
+				HostName: "example.com",
+				Record:   "myapp=",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validation error",
+			args: args{
+				config:          nil,
+				useInternalCode: true,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GenerateTxtRecordFromConfig(tt.args.config, tt.args.useInternalCode)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GenerateTxtRecordFromConfig() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != nil && !strings.Contains(got.Record, tt.want.Record) {
+				t.Errorf("expected: %v, got: %v", tt.want.Record, got.Record)
+			}
+		})
+	}
+}
+
+func TestGenerateTxtRecord(t *testing.T) {
+	type args struct {
+		appName string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *DnsRecordInstruction
+		wantErr bool
+	}{
+		{
+			name: "Successful generation",
+			args: args{
+				appName: "myapp",
+			},
+			want: &DnsRecordInstruction{
+				HostName: "myapp",
+				Record:   "myapp-site-verification=",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validation error",
+			args: args{
+				appName: "",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GenerateTxtRecord(tt.args.appName)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GenerateTxtRecord() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != nil && !strings.Contains(got.Record, tt.want.Record) {
+				t.Errorf("expected: %v, got: %v", tt.want.Record, got.Record)
+			}
+		})
+	}
+}
