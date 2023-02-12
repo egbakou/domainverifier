@@ -144,6 +144,10 @@ func checkXmlOrJsonFile(useXmlMethod bool, domain, fileName string, expectedValu
 		err = json.NewDecoder(resp.Body).Decode(decodedValue)
 	}
 
+	if err != nil {
+		return false, err
+	}
+
 	actualValue := reflect.ValueOf(decodedValue).Elem()
 	mustMatchValue := reflect.ValueOf(expectedValue)
 

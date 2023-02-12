@@ -53,7 +53,7 @@ func getXmlInstruction(xmlFileName, rootName, code string) string {
 
 func getXmlContent(rootName, code string) string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf(`%s`, xml.Header))
+	sb.WriteString(xml.Header)
 	sb.WriteString(fmt.Sprintf(`<%s><code>%s</code></%s>`, rootName, code, rootName))
 	return sb.String()
 }

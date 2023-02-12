@@ -84,7 +84,7 @@ func (x *XmlGenerator) Validate() error {
 
 func (x *XmlGenerator) ToXml() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf(`%s`, xml.Header))
+	sb.WriteString(xml.Header)
 	sb.WriteString(fmt.Sprintf(`<%s><code>%s</code></%s>`, x.RootName, x.Code, x.RootName))
 	return sb.String()
 }
