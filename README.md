@@ -61,7 +61,7 @@ if err == nil {
 
 This function offers a straightforward approach to generating instructions for the HTML meta tag method.
 
-The `appName` serves as `TagName` appended by ****`-site-verification`**.** If `sanitizeAppName` is set to true, non-alphanumeric characters will be removed from the `appName`**.**
+The `appName` serves as `TagName` appended by  `-site-verification`**.** If `sanitizeAppName` is set to true, non-alphanumeric characters will be removed from the `appName`**.**
 
 This function is the simple way to generate instruction for the HTML meta tag method.
 
@@ -108,10 +108,10 @@ Once the JSON file is uploaded, the ownership verification service can access th
 
 ```go
 config := &config.JsonGenerator{
-					FileName:  "example.json",
-					Attribute: "code",
-					Code:      "external-code", // a unique random string, optional if useInternalCode is true
-				},
+    FileName:  "example.json",
+	Attribute: "code",
+	Code:      "external-code", // optional if useInternalCode is true
+},
 
 // If useInternalCode is set to true, cf.code will be automatically filled with an internal K-Sortable Globally Unique ID
 instruction, err := domainverifier.GenerateJsonFromConfig(config, false)
