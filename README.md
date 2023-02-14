@@ -2,8 +2,6 @@
 
 [![Go Reference](<https://pkg.go.dev/badge/github.com/egbakou/domainverifier.svg>)](<https://pkg.go.dev/github.com/egbakou/domainverifier>) [![CI](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml/badge.svg>)](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml>)
 
-<img src='assets/banner.png' height=230 />
-
 `domainverifier` is a Go package that provides a simple and easy way to verify domain name ownership. It also includes a generator module, which makes it easier for developers who are new to DNS verification to quickly set up and integrate the verification process into their applications.
 
 The package offers support for 5 different verification methods: `HTML Meta Tag`, `JSON File Upload`, `XML File Upload`, `DNS TXT record` and `DNS CNAME record`.
@@ -371,9 +369,9 @@ isVerified, err := domainverifier.CheckCnameRecord(dnsresolver.GooglePublicDNS, 
 fmt.Println("Is onwershsip verified:", isVerified)
 ```
 
-## Some utility functions
+## Utility functions
 
-In addition to its main features, `domainverifier` provides a some helper functions that can be used.
+In addition to its main features, `domainverifier` provides some helper functions that can be used.
 
 - `domainverifier.IsSecure(domain string, timeout time.Duration)` returns a Boolean value indicating whether the specified domain supports a secure connection over HTTPS or not.
 - `domainverifier.IsValidDomainName(domain string)` checks if a string is a valid domain name.
