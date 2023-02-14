@@ -18,7 +18,7 @@ Using Go modules is recommended.
 
 ## Usage
 
-This section assumes prior knowledge of generating instructions for domain name ownership verification. If not, please review the examples code for each verification method, which include the process of instruction generation.
+This section assumes prior knowledge of generating instructions for domain name ownership verification. If not, please review the examples code for each verification method, which include the process of instructions generation.
 
 ### 🚀 Html Meta Tag method
 
@@ -62,7 +62,7 @@ This function offers a straightforward approach to generating instructions for t
 
 The `appName` serves as `TagName` appended by `-site-verification`. If `sanitizeAppName` is set to true, non-alphanumeric characters will be removed from the `appName`.
 
-This function is the simple way to generate instruction for the HTML meta tag method.
+This function is the simple way to generate instructions for the HTML meta tag method.
 
 ```go
 instruction, err := domainverifier.GenerateHtmlMeta("your app name", true)
@@ -84,7 +84,7 @@ if err == nil {
 
 The verification process is fast and sample. It requires:
 
-- The domain name for which you’ve generated the verification instruction
+- The domain name for which you’ve generated the verification instructions
 - The Html Meta `Tag Name` and it `value`(Code) you have stored somewhere
 
 ```go
@@ -215,7 +215,7 @@ The `appName` serves as `FileName` appended by `SiteAuth.xml`.
 
 ```go
 // We advise setting the sanitizeAppName parameter to true
-instruction, err := GenerateXmlFromConfig("your app name", true)
+instruction, err := GenerateXml("your app name", true)
 
 if err == nil {
 	fmt.Println("FileName :", instruction.FileName)
@@ -242,6 +242,7 @@ Requirements:
 
 ```go
 type ownershipVerification struct {
+    XMLName struct{} `xml:"verification"`
 	Code string `xml:"code"`
 }
 
@@ -370,9 +371,9 @@ fmt.Println("Is onwershsip verified:", isVerified)
 
 ## Some utility functions
 
-The `domainverifier` module has made some internal helper functions publicly available.
+In addition to its main features, `domainverifier` provides a some helper functions that can be used.
 
-- `domainverifier.IsSecure(domain string, timeout time.Duration)` returns a boolean value indicating whether the specified domain supports a secure connection over HTTPS or not.
+- `domainverifier.IsSecure(domain string, timeout time.Duration)` returns a Boolean value indicating whether the specified domain supports a secure connection over HTTPS or not.
 - `domainverifier.IsValidDomainName(domain string)` checks if a string is a valid domain name.
 
 ## Contributions
