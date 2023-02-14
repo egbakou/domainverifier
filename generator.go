@@ -175,7 +175,7 @@ func GenerateTxtRecordFromConfig(config *config.TxtRecordGenerator, useInternalC
 	return &DnsRecordInstruction{
 		HostName: config.HostName,
 		Record:   fmt.Sprintf("%s=%s", config.RecordAttribute, config.RecordAttributeValue),
-		Action: fmt.Sprintf(`Create a TXT record with the name %s or your domain name and the content %s=%s`,
+		Action: fmt.Sprintf(`Create a TXT record with the name %s and the content %s=%s`,
 			config.HostName, config.RecordAttribute, config.RecordAttributeValue),
 	}, nil
 }
