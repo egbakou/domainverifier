@@ -19,20 +19,20 @@ const (
 // InvalidAppNameError indicates that the app name is invalid.
 var InvalidAppNameError = errors.New("app name cannot be empty")
 
-// HtmlMetaInstruction is the verification method that uses HTML meta tag.
+// HtmlMetaInstruction is the Html meta tag instruction.
 type HtmlMetaInstruction struct {
 	Code   string
 	Action string
 }
 
-// FileInstruction is the verification method that uses JSON or XML file.
+// FileInstruction is the JSON or XML file instruction.
 type FileInstruction struct {
 	FileName    string
 	FileContent string
 	Action      string
 }
 
-// DnsRecordInstruction is the verification method that uses TXT or CNAME record.
+// DnsRecordInstruction is the CNAME or TXT record instruction.
 type DnsRecordInstruction struct {
 	HostName string
 	Record   string

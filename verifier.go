@@ -26,8 +26,8 @@ var InvalidResponseError = errors.New("invalid response status code returned by 
 // Parameters:
 //
 //	domain: the domain name to check
-//	tagName: the name of the meta tag to check
-//	tagContent: the expected value of the meta tag
+//	metaTagName: the name of the meta tag to check
+//	metaTagContent: the expected value of the meta tag
 //
 // Returns:
 //   - true if the ownership of the domain is verified
@@ -156,13 +156,13 @@ func checkXmlOrJsonFile(useXmlMethod bool, domain, fileName string, expectedValu
 }
 
 // CheckTxtRecord checks if the domain has a DNS TXT record
-// with the specified value to verify ownership of the domain
+// with the specified values to verify ownership of the domain
 //
 // Parameters:
 //   - dnsResolver: the DNS server to use
-//   - domain: the domain name to check
+//   - domain: the domain name to verify
 //   - hostName: the TXT record name
-//   - recordContent: the name of the DNS TXT record to check
+//   - recordContent: the content of the TXT record
 //
 // Returns:
 //   - true if the ownership of the domain is verified
@@ -173,18 +173,18 @@ func checkXmlOrJsonFile(useXmlMethod bool, domain, fileName string, expectedValu
 //	dnsResolver = dnsresolver.CloudflareDNS
 //	domain := "website.com"
 //	hostName := "@"
-//	recordName := "myapp-site-verification=1234567890"
-//	verified, err := domainverify.CheckDnsTxtRecord(dnsServer, domain, hostName, recordName)
+//	recordContent := "myapp-site-verification=1234567890"
+//	verified, err := domainverify.CheckDnsTxtRecord(dnsServer, domain, hostName, recordContent)
 func CheckTxtRecord(dnsResolver, domain, hostName, recordContent string) (bool, error) {
 	return checkDNSRecord(dnsResolver, domain, hostName, recordContent, dns.TypeTXT)
 }
 
 // CheckCnameRecord checks if the domain has a DNS CNAME record
-// with the specified value to verify ownership of the domain
+// with the specified values to verify ownership of the domain
 //
 // Parameters:
 //   - dnsResolver: the DNS server to use
-//   - domain: the domain name to check
+//   - domain: the domain name to verify the ownership
 //   - recordName: the name of the DNS CNAME record to check
 //   - targetValue: the value of recordName
 //
