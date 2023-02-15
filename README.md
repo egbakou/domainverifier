@@ -2,7 +2,7 @@
 
 [![Go Reference](<https://pkg.go.dev/badge/github.com/egbakou/domainverifier.svg>)](<https://pkg.go.dev/github.com/egbakou/domainverifier>) [![CI](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml/badge.svg>)](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml>)
 
-`domainverifier` is a Go package that provides a simple and easy way to verify domain name ownership. It also includes a generator module, which makes it easier for developers who are new to DNS verification to quickly set up and integrate the verification process into their applications.
+`domainverifier` is a Go package that provides a fast and simple way to verify domain name ownership. It also includes a generator module, which makes it easier for developers who are new to DNS verification, to quickly set up and integrate the verification process into their applications.
 
 The package offers support for 5 different verification methods: `HTML Meta Tag`, `JSON File Upload`, `XML File Upload`, `DNS TXT record` and `DNS CNAME record`.
 
@@ -10,7 +10,7 @@ The package offers support for 5 different verification methods: `HTML Meta Tag`
 
 To get the package use the standard:
 
-```erlang
+```go
 go get -u github.com/egbakou/domainverifier
 ```
 
@@ -18,17 +18,17 @@ Using Go modules is recommended.
 
 ## Usage
 
-This section assumes prior knowledge of generating instructions for domain name ownership verification. If not, please review the examples code for each verification method, which include the process of instructions generation.
+This section assumes prior knowledge of domain name ownership verification. If not, please review the example code for each verification method, which include the process of instructions generation.
 
 ### 🚀 Html Meta Tag method
 
-`HTML Meta Tag` is an element that provide metadata about a web page. It is placed in the head section of an HTML document and provides information about the page to search engines and web browsers and others.
+`HTML Meta Tag` is an element that provide metadata about a web page. It is placed in the `head` section of an HTML document and provides information about the page to search engines, web browsers, and other services.
 
-This method requires the ability for the user to edit the HTML source code of his site's homepage.
+This method requires the ability for the users to edit the HTML source code of their site's homepage.
 
 💻 Generation
 
-The generator module contains two functions for generating HTML Meta tags to verify ownership of a specific domain name:
+The generator module contains two functions for generating HTML Meta tags to verify ownership of a specific domain name.
 
 ⤵️`func GenerateHtmlMetaFromConfig(config *config.HmlMetaTagGenerator, useInternalCode bool) (*HtmlMetaInstruction, error)`
 
@@ -39,7 +39,7 @@ config := &config.HmlMetaTagGenerator{
 }
 
 // If useInternalCode is set to true, config.Code will be automatically filled with an internal K-Sortable Globally Unique ID
-instruction, err := domainverifier.GenerateHtmlMetaFromConfig(cf, false)
+instruction, err := domainverifier.GenerateHtmlMetaFromConfig(config, false)
 
 if err == nil {
 	fmt.Println("Html Code", instruction.Code)
@@ -62,8 +62,6 @@ This function offers a straightforward approach to generating instructions for t
 
 The `appName` serves as `TagName` appended by `-site-verification`. If `sanitizeAppName` is set to true, non-alphanumeric characters will be removed from the `appName`.
 
-This function is the simple way to generate instructions for the HTML meta tag method.
-
 ```go
 instruction, err := domainverifier.GenerateHtmlMeta("your app name", true)
 
@@ -82,7 +80,7 @@ if err == nil {
 
 🔎 Verification
 
-The verification process is fast and sample. It requires:
+The verification process is quick and straightforward. It requires:
 
 - The domain name for which you’ve generated the verification instructions
 - The Html Meta `Tag Name` and it `value`(Code) you have stored somewhere
@@ -92,14 +90,14 @@ isVerified, err := domainverifier.CheckHtmlMetaTag("the-domain-to-verify.com",
 		"tag name",
 		"verification-code")
 
-fmt.Println("Is onwershsip verified:", isVerified)
+fmt.Println("Is ownership verified:", isVerified)
 ```
 
 ### 🚀 JSON file upload method
 
-In the JSON method,  you need to create a JSON file that contains a specific structure, including a key-value pair that proves ownership of the domain. User then upload the JSON file to his website's root directory.
+In the JSON method,  you need to create a JSON file that contains a specific structure, including a key-value pair that proves ownership of the domain. Users then upload the JSON file to their website's root directory.
 
-Once the JSON file is uploaded, the ownership verification service can access the file and verify the contents to confirm that the user indeed own the domain.
+After the JSON file has been uploaded, the ownership verification service can access it and verify its contents to confirm that the user does indeed own the domain.
 
 💻 Generation
 
@@ -162,6 +160,10 @@ Requirements:
 - The JSON file name
 - An object of type `struct` that matches the content of the JSON file.
 
+As an example, suppose the domain name to be verified is `the-domain-to-verify.com`, the JSON file is named `example.json`, and the contents of the file are `{"code": "verification-code"}`. To perform ownership verification, you can use the following code snippet. Keep in mind that the file at `http://the-domain-to-verify.com/example.json` or `https://the-domain-to-verify.com/example.json` must be accessible.
+
+ In that case, the following code snippet demonstrates how to perform ownership verification.
+
 ```go
 type ownershipVerification struct {
 	Code string json:"code"
@@ -173,7 +175,7 @@ isVerified, err := domainverifier.CheckJsonFile("the-domain-to-verify.com",
 		"example.json",
 		expectedValue)
 
-fmt.Println("Is onwershsip verified:", isVerified)
+fmt.Println("Is ownership verified:", isVerified)
 ```
 
 ### 🚀 XML  file upload method
@@ -220,13 +222,13 @@ instruction, err := GenerateXml("your app name", true)
 if err == nil {
 	fmt.Println("FileName :", instruction.FileName)
 	// Output: 
-	// YourappnameSiteauth.xml
+	// YourappnameSiteAuth.xml
 	fmt.Println("FileContent:", instruction.FileContent)
 	// Output: 
 	// <verification><code>random K-Sortable unique code</code></verification>
 	fmt.Println("Indication to provide to the user", instruction.Action)
 	// Output:
-	// Create an XML file named example.xml with the content:
+	// Create an XML file named YourappnameSiteAuth.xml with the content:
 	// <verification><code>random K-Sortable unique code</code></verificationt>
 	// and upload it to the root of your site.
 }
@@ -252,12 +254,12 @@ isVerified, err := domainverifier.CheckXmlFile("the-domain-to-verify.com",
 		"example.xml",
 		expectedValue)
 
-fmt.Println("Is onwershsip verified:", isVerified)
+fmt.Println("Is ownership verified:", isVerified)
 ```
 
 ### 🚀 DNS TXT record method
 
-With this method, user needs to add a specific TXT record to the DNS configuration of your domain. The TXT record contains a unique value that proves ownership of the domain.
+With this method, user needs to add a specific TXT record to the DNS configuration of their domain. The TXT record contains a unique value that proves ownership of the domain.
 
 💻 Generation
 
@@ -322,7 +324,7 @@ Requirements:
 ```go
 isVerified, err := domainverifier.CheckTxtRecord(dnsresolver.GooglePublicDNS, "the-domain-to-verify.com", "@", "yapp=random-code")
 
-fmt.Println("Is onwershsip verified:", isVerified)
+fmt.Println("Is ownership verified:", isVerified)
 ```
 
 ### 🚀 DNS CNAME record method
@@ -366,7 +368,7 @@ Requirements:
 ```go
 isVerified, err := domainverifier.CheckCnameRecord(dnsresolver.GooglePublicDNS, "the-domain-to-verify.com", "random-code", "verify.example.com")
 
-fmt.Println("Is onwershsip verified:", isVerified)
+fmt.Println("Is ownership verified:", isVerified)
 ```
 
 ## Utility functions
