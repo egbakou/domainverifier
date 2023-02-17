@@ -1,6 +1,6 @@
 # domainverifier
 
-[![Go Reference](<https://pkg.go.dev/badge/github.com/egbakou/domainverifier.svg>)](<https://pkg.go.dev/github.com/egbakou/domainverifier>) [![CI](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml/badge.svg>)](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml>)
+[![CI](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml/badge.svg>)](<https://github.com/egbakou/domainverifier/actions/workflows/ci.yml>) [![Go Report Card](https://goreportcard.com/badge/github.com/egbakou/domainverifier)](https://goreportcard.com/report/github.com/egbakou/domainverifier) [![Go Reference](<https://pkg.go.dev/badge/github.com/egbakou/domainverifier.svg>)](<https://pkg.go.dev/github.com/egbakou/domainverifier>) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/egbakou/domainverifier)
 
 `domainverifier` is a Go package that provides a fast and simple way to verify domain name ownership. It also includes a generator module, which makes it easier for developers who are new to DNS verification, to quickly set up and integrate the verification process into their applications.
 
