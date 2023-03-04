@@ -25,8 +25,8 @@ This section assumes prior knowledge of domain name ownership verification. If n
 `HTML Meta Tag` is an element that provide metadata about a web page. It is placed in the `head` section of an HTML document and provides information about the page to search engines, web browsers, and other services.
 
 This method requires the ability for the users to edit the HTML source code of their site's homepage.
-
-💻 Generation
+<details>
+<summary>💻 Generation</summary>
 
 The generator module contains two functions for generating HTML Meta tags to verify ownership of a specific domain name.
 
@@ -77,6 +77,7 @@ if err == nil {
 	// * To stay verified, don't remove the meta tag even after verification succeeds.
 }
 ```
+</details>
 
 🔎 Verification
 
@@ -99,7 +100,8 @@ In the JSON method,  you need to create a JSON file that contains a specific str
 
 After the JSON file has been uploaded, the ownership verification service can access it and verify its contents to confirm that the user does indeed own the domain.
 
-💻 Generation
+<details>
+<summary>💻 Generation</summary>
 
 ⤵️ `GenerateJsonFromConfig(config *config.JsonGenerator, useInternalCode bool) (*FileInstruction, error)`
 
@@ -151,7 +153,7 @@ if err == nil {
 	// and upload it to the root of your site.
 }
 ```
-
+</details>
 🔎 Verification
 
 Requirements:
@@ -181,6 +183,9 @@ fmt.Println("Is ownership verified:", isVerified)
 ### 🚀 XML  file upload method
 
 This approach is similar to the JSON method. There are two functions you can use to provide verification instructions to users.
+
+<details>
+<summary>💻 Generation</summary>
 
 ⤵️ `func GenerateXmlFromConfig(config *config.XmlGenerator, useInternalCode bool) (*FileInstruction, error)`
 
@@ -233,6 +238,7 @@ if err == nil {
 	// and upload it to the root of your site.
 }
 ```
+</details>
 
 🔎 Verification
 
@@ -261,7 +267,8 @@ fmt.Println("Is ownership verified:", isVerified)
 
 With this method, user needs to add a specific TXT record to the DNS configuration of their domain. The TXT record contains a unique value that proves ownership of the domain.
 
-💻 Generation
+<details>
+<summary>💻 Generation</summary>
 
 ⤵️ `func GenerateTxtRecordFromConfig(config *config.TxtRecordGenerator, useInternalCode bool) (*DnsRecordInstruction, error)`
 
@@ -311,6 +318,7 @@ if err == nil {
 	// Create a TXT record with the name @ and the content yourappname-site-verification=random K-Sortable unique code
 }
 ```
+</details>
 
 🔎 Verification
 
@@ -329,7 +337,8 @@ fmt.Println("Is ownership verified:", isVerified)
 
 ### 🚀 DNS CNAME record method
 
-💻 Generation
+<details>
+<summary>💻 Generation</summary>
 
 ⤵️ `func GenerateCnameRecordFromConfig(config *config.CnameRecordGenerator) (*DnsRecordInstruction, error)`
 
@@ -355,6 +364,8 @@ if err == nil {
 ```
 
 > 💡 Ensure to store the DNS CNAME record information generated, including the Record Name and Record Target.
+
+</details>
 
 🔍 Verification
 
